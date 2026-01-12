@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>區塊文字擷取器</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </div>
+      <h1>區塊文字擷取器</h1>
+    </header>
+
+    <main class="main">
+      <section class="format-section">
+        <label class="section-label">輸出格式</label>
+        <div class="format-options">
+          <button class="format-btn active" data-format="text">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 7V4H20V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 20H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>純文字</span>
+          </button>
+          <button class="format-btn" data-format="markdown">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 5H21V19H3V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 15V9L10 12L13 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M17 12L19 14.5M17 12L15 14.5M17 12V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Markdown</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="action-section">
+        <button id="startSelect" class="primary-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 3L19 12L12 13L9 20L5 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>開始選擇區塊</span>
+        </button>
+      </section>
+
+      <section class="status-section" id="statusSection" style="display: none;">
+        <div class="status-indicator">
+          <div class="pulse"></div>
+          <span id="statusText">選擇模式已啟動</span>
+        </div>
+      </section>
+
+      <section class="result-section" id="resultSection" style="display: none;">
+        <label class="section-label">擷取結果</label>
+        <div class="result-container">
+          <textarea id="resultText" readonly placeholder="擷取的文字將顯示在這裡..."></textarea>
+          <button id="copyBtn" class="copy-btn" title="複製到剪貼簿">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="result-meta" id="resultMeta"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="tip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="1" fill="currentColor"/>
+        </svg>
+        <span>點擊區塊擷取文字，按 ESC 取消</span>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span id="toastText">已複製到剪貼簿</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

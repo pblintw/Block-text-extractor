@@ -1,0 +1,19 @@
+/* Block Text Extractor - Content Styles */
+
+/* Overlay highlight */
+#bte-overlay {
+  position: fixed !important;
+  pointer-events: none !important;
+  border: 2px solid #6366f1 !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+  border-radius: 4px !important;
+  z-index: 2147483647 !important;
+  transition: all 0.1s ease !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Selection mode cursor */
+.bte-selecting,
+.bte-selecting * {
+  cursor: crosshair !important;
+}

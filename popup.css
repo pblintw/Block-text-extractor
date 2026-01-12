@@ -1,0 +1,320 @@
+/* Base Reset & Variables */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #252525;
+  --bg-hover: #2a2a2a;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.3);
+  --success: #22c55e;
+  --success-glow: rgba(34, 197, 94, 0.3);
+  --border: #333333;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --transition: all 0.2s ease;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  min-width: 320px;
+  max-width: 320px;
+}
+
+/* Container */
+.container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+  border-radius: var(--radius-md);
+  color: white;
+}
+
+.header h1 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+/* Main Content */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Section Labels */
+.section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+/* Format Options */
+.format-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.format-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.format-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.format-btn.active {
+  background: var(--bg-tertiary);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.format-btn svg {
+  flex-shrink: 0;
+}
+
+/* Primary Button */
+.primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+.primary-btn.selecting {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 4px 15px var(--success-glow);
+}
+
+/* Status Section */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+/* Result Section */
+.result-container {
+  position: relative;
+}
+
+#resultText {
+  width: 100%;
+  min-height: 120px;
+  max-height: 200px;
+  padding: 12px;
+  padding-right: 44px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+#resultText:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.copy-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.copy-btn.copied {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.result-meta {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Footer */
+.footer {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tip svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--success);
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow);
+  transition: bottom 0.3s ease;
+  z-index: 1000;
+}
+
+.toast.show {
+  bottom: 16px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
