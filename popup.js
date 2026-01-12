@@ -1,24 +1,25 @@
 // DOM Elements
-const formatBtns = document.querySelectorAll('.format-btn');
-const startSelectBtn = document.getElementById('startSelect');
-const statusSection = document.getElementById('statusSection');
-const statusText = document.getElementById('statusText');
-const resultSection = document.getElementById('resultSection');
-const resultText = document.getElementById('resultText');
-const resultMeta = document.getElementById('resultMeta');
-const copyBtn = document.getElementById('copyBtn');
-const toast = document.getElementById('toast');
-const toastText = document.getElementById('toastText');
+var formatBtns = document.querySelectorAll('.format-btn');
+var startSelectBtn = document.getElementById('startSelect');
+var statusSection = document.getElementById('statusSection');
+var statusText = document.getElementById('statusText');
+var resultSection = document.getElementById('resultSection');
+var resultText = document.getElementById('resultText');
+var resultMeta = document.getElementById('resultMeta');
+var copyBtn = document.getElementById('copyBtn');
+var toast = document.getElementById('toast');
+var toastText = document.getElementById('toastText');
 
 // State
-let selectedFormat = 'text';
-let isSelecting = false;
-let currentTabId = null;
+var selectedFormat = 'text';
+var isSelecting = false;
+var currentTabId = null;
 
 // Initialize
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async function() {
   // Get current tab
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  var tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  var tab = tabs[0];
   currentTabId = tab.id;
   
   // Check if we can run on this page
@@ -30,17 +31,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   
   // Load saved format preference
-  chrome.storage.local.get(['format'], (result) => {
+  chrome.storage.local.get(['format', 'lastExtracted'], function(result) {
     if (result.format) {
       selectedFormat = result.format;
       updateFormatButtons();
+    }
+    
+    // Show last extracted text if recent (within 30 seconds)
+    if (result.lastExtracted && Date.now() - result.lastExtracted.timestamp < 30000) {
+      resultSection.style.display = 'block';
+      resultText.value = result.lastExtracted.text;
+      var formatLabel = result.lastExtracted.format === 'markdown' ? 'Markdown' : '純文字';
+      resultMeta.textContent = formatLabel + ' · ' + result.lastExtracted.text.length + ' 字元';
     }
   });
 });
 
 // Format button handlers
-formatBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
+formatBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
     selectedFormat = btn.dataset.format;
     updateFormatButtons();
     chrome.storage.local.set({ format: selectedFormat });
@@ -48,33 +57,19 @@ formatBtns.forEach(btn => {
 });
 
 function updateFormatButtons() {
-  formatBtns.forEach(btn => {
+  formatBtns.forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.format === selectedFormat);
   });
 }
 
-// Inject content script and CSS
+// Inject content script
 async function injectContentScript(tabId) {
   try {
-    // Inject CSS first
     await chrome.scripting.insertCSS({
       target: { tabId: tabId },
-      css: `
-        #bte-overlay {
-          position: fixed !important;
-          pointer-events: none !important;
-          border: 2px solid #6366f1 !important;
-          background: rgba(99, 102, 241, 0.1) !important;
-          border-radius: 4px !important;
-          z-index: 2147483647 !important;
-          transition: all 0.1s ease !important;
-          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2) !important;
-          display: none;
-        }
-      `
+      css: '#bte-overlay{position:fixed!important;pointer-events:none!important;border:2px solid #6366f1!important;background:rgba(99,102,241,.15)!important;border-radius:4px!important;z-index:2147483646!important;box-shadow:0 0 0 4px rgba(99,102,241,.25)!important;display:none}'
     });
     
-    // Inject main script
     await chrome.scripting.executeScript({
       target: { tabId: tabId },
       files: ['content.js']
@@ -82,50 +77,51 @@ async function injectContentScript(tabId) {
     
     return true;
   } catch (error) {
-    console.error('Failed to inject script:', error);
+    console.error('Inject failed:', error);
     return false;
   }
 }
 
 // Start selection button
-startSelectBtn.addEventListener('click', async () => {
+startSelectBtn.addEventListener('click', async function() {
   if (!currentTabId) return;
   
   if (isSelecting) {
-    // Stop selection mode
     try {
       await chrome.tabs.sendMessage(currentTabId, { action: 'stopSelection' });
-    } catch (e) {
-      // Ignore errors
-    }
+    } catch (e) {}
     setSelectingState(false);
-  } else {
-    // Inject script and start selection
-    statusSection.style.display = 'block';
-    statusText.textContent = '正在初始化...';
+    return;
+  }
+  
+  statusSection.style.display = 'block';
+  statusText.textContent = '正在初始化...';
+  
+  var injected = await injectContentScript(currentTabId);
+  
+  if (!injected) {
+    showToast('無法在此頁面使用', 'error');
+    statusSection.style.display = 'none';
+    return;
+  }
+  
+  await new Promise(function(r) { setTimeout(r, 150); });
+  
+  try {
+    await chrome.tabs.sendMessage(currentTabId, { 
+      action: 'startSelection',
+      format: selectedFormat
+    });
+    setSelectingState(true);
     
-    const injected = await injectContentScript(currentTabId);
-    
-    if (!injected) {
-      showToast('無法在此頁面使用', 'error');
-      statusSection.style.display = 'none';
-      return;
-    }
-    
-    // Small delay to ensure script is ready
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    try {
-      await chrome.tabs.sendMessage(currentTabId, { 
-        action: 'startSelection',
-        format: selectedFormat
-      });
-      setSelectingState(true);
-    } catch (error) {
-      console.error('Failed to start selection:', error);
-      showToast('啟動失敗，請重試', 'error');
-      statusSection.style.display = 'none';
-    }
+    // Close popup after a short delay so user can see the status
+    setTimeout(function() {
+      window.close();
+    }, 500);
+  } catch (error) {
+    console.error('Start failed:', error);
+    showToast('啟動失敗，請重試', 'error');
+    statusSection.style.display = 'none';
   }
 });
 
@@ -133,73 +129,53 @@ function setSelectingState(selecting) {
   isSelecting = selecting;
   
   if (selecting) {
-    startSelectBtn.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="6" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
-      </svg>
-      <span>停止選擇</span>
-    `;
+    startSelectBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="6" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/></svg><span>停止選擇</span>';
     startSelectBtn.classList.add('selecting');
     statusSection.style.display = 'block';
     statusText.textContent = '選擇模式已啟動，請點擊網頁區塊';
   } else {
-    startSelectBtn.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 3L19 12L12 13L9 20L5 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>開始選擇區塊</span>
-    `;
+    startSelectBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 3L19 12L12 13L9 20L5 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>開始選擇區塊</span>';
     startSelectBtn.classList.remove('selecting');
     statusSection.style.display = 'none';
   }
 }
 
 // Copy button
-copyBtn.addEventListener('click', () => {
-  const text = resultText.value;
+copyBtn.addEventListener('click', function() {
+  var text = resultText.value;
   if (!text) return;
   
-  navigator.clipboard.writeText(text).then(() => {
+  navigator.clipboard.writeText(text).then(function() {
     copyBtn.classList.add('copied');
     showToast('已複製到剪貼簿');
-    setTimeout(() => {
+    setTimeout(function() {
       copyBtn.classList.remove('copied');
     }, 1500);
-  }).catch(err => {
+  }).catch(function() {
     showToast('複製失敗', 'error');
   });
 });
 
 // Show toast notification
-function showToast(message, type = 'success') {
+function showToast(message, type) {
   toastText.textContent = message;
   toast.style.background = type === 'error' ? '#ef4444' : '#22c55e';
   toast.classList.add('show');
-  setTimeout(() => {
+  setTimeout(function() {
     toast.classList.remove('show');
   }, 2000);
 }
 
 // Listen for messages from content script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.action === 'textExtracted') {
-    // Show result
     resultSection.style.display = 'block';
     resultText.value = message.text;
     
-    // Show meta info
-    const charCount = message.text.length;
-    const formatLabel = message.format === 'markdown' ? 'Markdown' : '純文字';
-    resultMeta.textContent = `${formatLabel} · ${charCount} 字元`;
+    var formatLabel = message.format === 'markdown' ? 'Markdown' : '純文字';
+    resultMeta.textContent = formatLabel + ' · ' + message.text.length + ' 字元';
     
-    // Auto copy to clipboard
-    navigator.clipboard.writeText(message.text).then(() => {
-      showToast('文字已擷取並複製');
-    }).catch(() => {
-      showToast('已擷取，請手動複製', 'error');
-    });
-    
-    // Reset selection state
+    showToast('文字已擷取並複製');
     setSelectingState(false);
   } else if (message.action === 'selectionCancelled') {
     setSelectingState(false);

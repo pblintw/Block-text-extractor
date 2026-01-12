@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "區塊文字擷取器",
   "name_en": "Block Text Extractor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "選擇網頁區塊，複製為純文字或 Markdown 格式",
   "permissions": [
     "activeTab",
@@ -22,5 +22,8 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
   }
 }
